@@ -30,14 +30,14 @@ const registerUser = async (req, res) => {
 
         const hashedPassword = await generateBcrypt(password)
 
-        // const data = {
-        //     username: username,
-        //     email: email,
-        //     name: name,
-        //     password: hashedPassword
-        // }
+        const data = {
+            username: username,
+            email: email,
+            name: name,
+            password: hashedPassword
+        }
 
-        // insertUserRepo(data)
+        insertUserRepo(data)
 
         return res.status(200), res.json({
             success: true,
@@ -65,23 +65,22 @@ const loginUser = async (req, res) => {
             password
         } = await req.body
 
-        // const findResult = findUserRepo(username)
-        // console.log(findResult)
-        // const encodeResult = await authBcrypt(password, findResult[0].password)
+        const findResult = await findUserRepo(username)
+        const encodeResult = await authBcrypt(password, findResult.password)
 
-        // if (findResult == undefined) {
-        //     return res.status(401), res.json({
-        //         success: false,
-        //         message: "Bad request"
-        //     })
-        // }
+        if (findResult == undefined) {
+            return res.status(401), res.json({
+                success: false,
+                message: "Bad request"
+            })
+        }
 
-        // if (encodeResult == false) {
-        //     return res.status(401), res.json({
-        //         success: false,
-        //         message: "Bad request"
-        //     })
-        // }
+        if (encodeResult == false) {
+            return res.status(401), res.json({
+                success: false,
+                message: "Bad request"
+            })
+        }
 
         return res.status(200), res.json({
             success: true,
