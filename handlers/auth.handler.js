@@ -1,4 +1,5 @@
-const { insertUserRepo, findUserRepo } = require("../repositories/auth.repo.js")
+const jwt = require("jsonwebtoken")
+const { insertUserRepo, findUserRepo, findEmailRepo } = require("../repositories/auth.repo.js")
 const {
     generateBcrypt,
     authBcrypt
@@ -14,17 +15,28 @@ const registerUser = async (req, res) => {
             confirm_password
         } = await req.body
 
+        const findUser = await findUserRepo(username)
+        const findEmail = await findEmailRepo(email)
+
+
+        if (findUser != null || findEmail != null) {
+            return res.status(401), res.json({
+                succes: false,
+                message: "invalid input"
+            })
+        }
+
         if (!(username && email && name && password && confirm_password)) {
             return res.status(401), res.json({
                 success: false,
-                message: "input invalid"
+                message: "invalid input"
             })
         }
 
         if (password !== confirm_password) {
             return res.status(401), res.json({
                 success: false,
-                message: "Input invalid"
+                message: "password doesn't match"
             })
         }
 
@@ -50,7 +62,7 @@ const registerUser = async (req, res) => {
         })
 
     } catch (error) {
-        console.log(error)
+        console.error("error in auth register", error)
         return res.status(500), res.json({
             success: false,
             message: "internal server error"
@@ -65,10 +77,10 @@ const loginUser = async (req, res) => {
             password
         } = await req.body
 
-        const findResult = await findUserRepo(username)
-        const encodeResult = await authBcrypt(password, findResult.password)
+        const findUser = await findUserRepo(username)
+        const encodeResult = await authBcrypt(password, findUser.password)
 
-        if (findResult == undefined) {
+        if (findUser == undefined) {
             return res.status(401), res.json({
                 success: false,
                 message: "Bad request"
@@ -82,13 +94,23 @@ const loginUser = async (req, res) => {
             })
         }
 
+        const payload = {
+            username: findUser.username,
+            email: findUser.email,
+            name: findUser.name
+
+        }
+
+        const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: "10s" })
+
         return res.status(200), res.json({
             success: true,
-            message: username, password
+            message: "Login Success",
+            token: token
         })
 
     } catch (error) {
-        console.log(error)
+        console.error("error in auth login", error)
     }
 }
 

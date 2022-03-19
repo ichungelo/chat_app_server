@@ -9,8 +9,9 @@ router.route("/api/auth/login")
     .get((req, res) => { res.status(200), res.json({ message: "Login" }) })
     .post(loginUser)
 
-// router.route("/api/chat")
-//     .get(getChat)
-//     .post(writeChat)
-router.all("*", (req, res) => { res.status(200), res.json({ message: "OK" }) })
+router.route("/api/chat/:username")
+    // .get(getChat)
+    .post(writeChat)
+
+router.all("*", (req, res) => { res.status(404), res.json({ message: "Endpoint not found" }) })
 module.exports = router

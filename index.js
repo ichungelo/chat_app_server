@@ -1,4 +1,3 @@
-const connection = require("./config/conn.config.js")
 const express = require("express")
 const http = require("http")
 const dotenv = require("dotenv")
@@ -15,12 +14,13 @@ app.use(express.json())
 app.use(cors())
 dotenv.config()
 
-io.on("connection", (socket) =>{
+io.on("connection", (socket) => {
     socket.on("chat message", (msg) => {
         io.emit("chat message", msg)
     })
 })
 app.use("/", require("./routes/router.js"))
+const host = process.env.CONNECTION_HOST
+const port = process.env.CONNECTION_PORT
 
-
-server.listen(connection.port, connection.host, () => console.log(`Connect in http://${connection.host}:${connection.port}`))
+server.listen(port, host, () => console.log(`Connect in http://${host}:${port}`))

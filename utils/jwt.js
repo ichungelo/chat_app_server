@@ -11,7 +11,7 @@ const generateToken = (payload) => {
         })
         return token
     } catch (error) {
-        console.log(error)
+        console.error("error in jwt generate", error)
     }
 }
 
@@ -20,7 +20,7 @@ const authToken = (token) => {
         const payload = jwt.verify(token, process.env.SECRET_KEY)
         return payload
     } catch (error) {
-        console.log(error)
+        console.error("error in jwt auth", error)
     }
 }
 
