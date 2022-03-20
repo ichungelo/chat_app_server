@@ -12,6 +12,7 @@ const generateToken = (payload) => {
         return token
     } catch (error) {
         console.error("error in jwt generate", error)
+        throw error
     }
 }
 
@@ -21,6 +22,7 @@ const authToken = (token) => {
         return payload
     } catch (error) {
         console.error("error in jwt auth", error)
+        throw error
     }
 }
 

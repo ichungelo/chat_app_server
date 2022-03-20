@@ -1,9 +1,9 @@
-const jwt = require("jsonwebtoken")
 const { insertUserRepo, findUserRepo, findEmailRepo } = require("../repositories/auth.repo.js")
 const {
     generateBcrypt,
     authBcrypt
 } = require("../utils/bcrypt.js")
+const { authToken, generateToken } = require("../utils/jwt.js")
 
 const registerUser = async (req, res) => {
     try {
@@ -53,12 +53,7 @@ const registerUser = async (req, res) => {
 
         return res.status(200), res.json({
             success: true,
-            message: {
-                username: username,
-                email: email,
-                name: name,
-                password: hashedPassword
-            }
+            message: "Register success"
         })
 
     } catch (error) {
@@ -78,8 +73,6 @@ const loginUser = async (req, res) => {
         } = await req.body
 
         const findUser = await findUserRepo(username)
-        const encodeResult = await authBcrypt(password, findUser.password)
-
         if (findUser == undefined) {
             return res.status(401), res.json({
                 success: false,
@@ -87,6 +80,7 @@ const loginUser = async (req, res) => {
             })
         }
 
+        const encodeResult = await authBcrypt(password, findUser.password)
         if (encodeResult == false) {
             return res.status(401), res.json({
                 success: false,
@@ -101,7 +95,7 @@ const loginUser = async (req, res) => {
 
         }
 
-        const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: "10s" })
+        const token = generateToken(payload)
 
         return res.status(200), res.json({
             success: true,
@@ -111,10 +105,31 @@ const loginUser = async (req, res) => {
 
     } catch (error) {
         console.error("error in auth login", error)
+        throw error
+    }
+}
+
+const verifyToken = async (req, res) => {
+    try {
+        const token = await req.body.token
+
+        const tokenVerifier = authToken(token)
+
+        return res.json({
+            success: true,
+            payload: tokenVerifier
+        })
+    } catch (error) {
+        console.error("error in verify token", error)
+        return res.json({
+            success: false,
+            message: "invalid token"
+        })
     }
 }
 
 module.exports = {
     registerUser,
-    loginUser
+    loginUser,
+    verifyToken
 }

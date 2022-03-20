@@ -1,16 +1,18 @@
 const router = require("express").Router()
-const { registerUser, loginUser } = require("../handlers/auth.handler.js")
+const { registerUser, loginUser, verifyToken } = require("../handlers/auth.handler.js")
 const { writeChat } = require("../handlers/chat.handler.js")
+const { socketIo } = require("../ws/ws.js")
 
 router.route("/api/auth/register")
     .post(registerUser)
 
 router.route("/api/auth/login")
-    .get((req, res) => { res.status(200), res.json({ message: "Login" }) })
     .post(loginUser)
 
+router.route("/api/auth/verify").post(verifyToken)
+
 router.route("/api/chat/:username")
-    // .get(getChat)
+    .get(socketIo)
     .post(writeChat)
 
 router.all("*", (req, res) => { res.status(404), res.json({ message: "Endpoint not found" }) })
